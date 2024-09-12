@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class ProductController extends Controller
@@ -18,20 +22,9 @@ class ProductController extends Controller
     {
         //
         $companies = Company::all();
-        $products = Product::select([
-            'p.id',
-            'p.img_path',
-            'p.product_name',
-            'p.price',
-            'p.stock',
-            'c.company_name as company_id',
-        ])
-        ->from('products as p')
-        ->join('companies as c', function($join) {
-            $join->on('p.company_id', '=', 'c.id');
-        })
-        ->orderBy('p.id', 'DESC')
-        ->paginate(5);
+        $object = new Product();
+
+        $products = $object->product();
 
         return view('index', compact('products', 'companies'))
                 ->with('page_id', request()->page)
@@ -67,15 +60,40 @@ class ProductController extends Controller
             'stock'=>'required|integer',
     
         ]);
+        if($request->hasFile('img_path')) {
+            $filename = $request->file('img_path')->getClientOriginalName();
+            $path = $request->file('img_path')->storeAs('/public', $filename);
+           }else{
+            $path = null;
+           }
 
-        $product = new Product;
-        $product->product_name = $request->input(["product_name"]);
-        $product->company_id = $request->input(["company_id"]);
-        $product->price = $request->input(["price"]);
-        $product->stock = $request->input(["stock"]);
-        $product->comment = $request->input(["comment"]);
-        $product->img_path = $request->file(["img_path"]);
-        $product->save();
+        DB::beginTransaction();
+
+        try{
+            $product = new Product;
+            $product->product_name = $request->input('product_name');
+
+            $product->company_id = $request->input('company_id');
+            $product->price = $request->input('price');
+
+            $product->stock = $request->input('stock');
+
+            $product->comment = $request->input('comment');
+            
+            if(isset($path)) {
+                $product->img_path = $path;
+
+            }
+            $product->save();
+        
+           DB::commit();
+
+        } catch(\Exception $e) {
+            DB::rollBack();
+            \Log::error('Product creation failed: ' . $e->getMessage());
+            return back()->withErrors('保存に失敗しました。');
+
+        }
 
         return redirect()->route('products.index');
         
@@ -130,14 +148,23 @@ class ProductController extends Controller
     
         ]);
 
-        $product->product_name = $request->input(["product_name"]);
-        $product->company_id = $request->input(["company_id"]);
-        $product->price = $request->input(["price"]);
-        $product->stock = $request->input(["stock"]);
-        $product->comment = $request->input(["comment"]);
-        $product->img_path = $request->input(["img_path"]);
-        $product->save();
+        DB::beginTransaction();
 
+        try {
+            $product->product_name = $request->input(["product_name"]);
+            $product->company_id = $request->input(["company_id"]);
+            $product->price = $request->input(["price"]);
+            $product->stock = $request->input(["stock"]);
+            $product->comment = $request->input(["comment"]);
+            $product->img_path = $request->input(["img_path"]);
+            $product->save();
+
+           DB::commit(); 
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back();
+        }
         return redirect()->route('products.index');
     }
 
@@ -150,9 +177,22 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         //
-        $product->delete();
-        return redirect()->route('products.index')
-                        ->with('success', $product->product_name.'を削除しました');
+        DB::beginTransaction();
+
+        try {
+            $product->delete();
+            DB::commit();
+           
+            return redirect()->route('products.index')
+            ->with('success', $product->product_name.'を削除しました');
+             
+        } catch (\Exception $e){
+            DB::rollBack();
+            \Log::error('Product deletion failed: '.$e->getMessage());
+            return back()->withErrors('削除に失敗しました。');
+
+        }   
+                   
     }
 
     public function searchInput(Request $request)

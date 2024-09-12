@@ -18,7 +18,14 @@
             <!-- 画像ファイルの表示 -->
             <dt>画像</dt>
             <dd class="img-show">
-                {{$product->img_path}}
+                @if ($product->img_path == null)
+                    <p> No Image</p>
+                    @else
+                    <img src="{{ asset('storage/'.$product->img_path) }}"  alt="Image">
+    
+                
+                @endif
+            
             </dd>
 
             <!-- 商品名の表示 -->

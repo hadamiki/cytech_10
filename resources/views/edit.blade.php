@@ -26,7 +26,7 @@
             <!-- 商品名の編集 -->
             <dt>商品名<span class="req">*</span></dt>
             <dd>
-                <input type="text" name="product_name"></dd>
+                <input type="text" name="product_name" placeholder={{ $product->product_name }}></dd>
                 @error('product_name')
                 <span class="error">商品名を入力してください</span>
                 @enderror
@@ -36,9 +36,11 @@
             <dt>メーカー名<span class="req">*</span></dt>
             <dd>
                 <select class="select-cn" name="company_id" >
-                    <option></option>
+                    
                     @foreach ($companies as $company)
-                    <option value="{{ $company->id }}">{{$company->company_name}}</option>
+                    <option value="{{ $company->id }}"
+                     @if($company->id == old('company_id', $product->company_id)) selected @endif>
+                     {{ $company->company_name }}</option>
                     
                     @endforeach
                 </select>
@@ -50,7 +52,7 @@
             <!-- 価格の編集 -->
             <dt>価格<span class="req">*</span></dt>
             <dd>
-                <input type="text" name="price"></dd>
+                <input type="text" name="price" placeholder={{ $product->price }}></dd>
                 @error('price')
                 <span class="error">価格を入力してください</span>
                 @enderror
@@ -58,7 +60,7 @@
             <!-- 在庫数の編集 -->
             <dt>在庫数<span class="req">*</span></dt>
             <dd>
-                <input type="text" name="stock"></dd>
+                <input type="text" name="stock" placeholder={{ $product->stock }}></dd>
                 @error('stock')
                 <span style="color:red">在庫数を入力してください</span>
                 @enderror
@@ -66,7 +68,7 @@
             <!-- コメントの編集※NULLABLE -->
             <dt>コメント</dt>
             <dd>
-                <textarea name="comment"></textarea>
+                <textarea name="comment" placeholder={{ $product->comment }}></textarea>
             </dd>
             <!-- 画像の編集※NULLABLE -->
             <dt>画像</dt>

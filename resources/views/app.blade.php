@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自動販売機管理システム</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('CSS/style.css')}}">
+    <link rel="stylesheet" href="{{ asset('CSS/cytech_style.css')}}">
     <!-- ★CSSを外部読み込みさせる★ -->
 
 </head>

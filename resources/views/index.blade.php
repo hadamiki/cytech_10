@@ -57,7 +57,14 @@
         @foreach ($products as $product)
         <tr>
             <td class="td-id">{{ $product->id }}.</td>
-            <td>{{ $product->img_path }}</td>
+            <td>
+                @if ($product->img_path == null)
+                        <p>No Image</p>
+                        @else
+                        <img src="{{ asset('storage/'.$product->img_path) }}"  alt="Image">
+                @endif
+                
+            </td>
             <td>{{ $product->product_name }}</td>
             <td>{{ $product->price }}円</td>
             <td>{{ $product->stock }}個</td>
@@ -76,9 +83,16 @@
         @endforeach
     </table>
         <div class="boot-pagi">
-            {!! $products->links('pagination::bootstrap-5') !!}
+           {{ $products->links() }}
         </div>
 </div>
+
+<!-- 画像表示テスト
+<img src="{{ asset('/storage/R.png')}}" alt="">
+<p>{{ asset('/storage/R.png') }}</p> -->
+
+
+
 
     
 @endsection
